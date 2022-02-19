@@ -2,6 +2,7 @@ const container = document.getElementById("container")
 var mapSize, wolfCount, wallCount; 
 var mapMatrix = [], rabbitPosition=[] , homePosition = [],  wolfPosition = [], wallPosition = []
 
+var gameInProcess;
 
 //Determines the count of wolfs and the walls depending on the size of the Game Map
 function setCountsOfChar(selectedNumber){
@@ -111,23 +112,26 @@ function createCharechters () {
 
 //Understands what step we want to take
 function rabbitMove(key){
+    
+    if(gameInProcess){
 
-    if(key === "ArrowUp"){
-        decideNewPositionForRabbit(-1,0)
+        if(key === "ArrowUp"){
+            decideNewPositionForRabbit(-1,0)
+        }
+
+        else if(key === "ArrowDown"){
+            decideNewPositionForRabbit(1,0)
+        }
+
+        else if(key === "ArrowRight"){
+            decideNewPositionForRabbit(0,1)
+        }
+
+        else if(key === "ArrowLeft"){
+            decideNewPositionForRabbit(0,-1)
+        }
+        
     }
-
-    else if(key === "ArrowDown"){
-        decideNewPositionForRabbit(1,0)
-    }
-
-    else if(key === "ArrowRight"){
-        decideNewPositionForRabbit(0,1)
-    }
-
-    else if(key === "ArrowLeft"){
-        decideNewPositionForRabbit(0,-1)
-    }
-
     
 }
 
@@ -323,7 +327,9 @@ function minDistance (pythagoras) {
 function winGame(){
    
     if( rabbitPosition[0]===homePosition[0] && rabbitPosition[1]===homePosition[1] ){
-        container.innerHTML='<h2 class="winGame">!!!YOU WIN!!!</h2>'
+        container.innerHTML='<h2 class="winGame">!!!YOU WIN!!!</h2>';
+        gameInProcess = false;
+
     }
 
 }
@@ -335,7 +341,8 @@ function loseGame(){
   
     wolfPosition.map(wolf => {
         if( rabbitPosition[0]===wolf[0] && rabbitPosition[1]===wolf[1] ){
-            return container.innerHTML='<h2 class="loseGame">!!!YOU LOSE!!!</h1>';
+            gameInProcess = false;
+            container.innerHTML='<h2 class="loseGame">!!!YOU LOSE!!!</h1>';
         }
     })
 
@@ -345,7 +352,7 @@ function loseGame(){
 
 //When you click the "Start New Game" button, this function is called.
 function startGame(){
- 
+    gameInProcess=true;
     container.innerHTML="";
     wolfPosition=[];
     wallPosition=[];
