@@ -1,0 +1,50 @@
+body{
+    font-family:arial;
+}
+
+table,
+th,
+td {
+    border: 1px solid black;
+}
+
+table{
+    margin-top: 20px;
+}
+
+td {
+    width: 45px;
+    height: 45px;
+}
+
+label{
+    font-size: 20px;
+}
+
+
+.charImg{
+    width: 42px;
+    height: 42px;
+}
+
+
+.buttonStyle{
+background-color: #DC7633;
+border: none;
+color: white;
+padding: 7px 15px;
+text-align: center;
+text-decoration: none;
+display: inline-block;
+font-size: 16px;
+}
+
+.loseGame{
+    color: red;
+    font-size: 55px;
+}
+
+.winGame{
+    color: Green;
+    font-size: 55px;;
+}
