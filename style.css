@@ -1,11 +1,14 @@
 body{
     font-family:arial;
+   background-color: #363636;
+   color: white;
 }
 
 table,
 th,
 td {
     border: 1px solid black;
+    background-color:white;
 }
 
 table{
