@@ -1,363 +1,270 @@
 const container = document.getElementById("container")
-var mapSize, wolfCount, wallCount; 
-var mapMatrix = [], rabbitPosition=[] , homePosition = [],  wolfPosition = [], wallPosition = []
+const Y = 0, X = 1;
+var matrixState = [], mapSize, wolfCount, wallCount, gameInProcess = false;
 
-var gameInProcess;
 
-//Determines the count of wolfs and the walls depending on the size of the Game Map
-function setCountsOfChar(selectedNumber){
+const freeSpace = 0
 
-    if(selectedNumber==9){
-        mapSize=9
-        wolfCount=5;
-        wallCount=5;
-    }else if(selectedNumber==7){
-        mapSize=7
-        wolfCount=4;
-        wallCount=4;
-    }else{
-        mapSize=5
-        wolfCount=3;
-        wallCount=3;
-    }
+const wall = {
+    name: "wall",
+    img: "images/wall.png"
+}
 
+const home = {
+    name: "home",
+    img: "images/home.png"
+}
+
+const rabbit = {
+    name: "rabbit",
+    img: "images/rabbit.png",
+    possibleSteps: []
+}
+
+const wolf = {
+    name: "wolf",
+    img: "images/wolf.png",
+    possibleSteps: []
 }
 
 
-//Creating Game Map
-function mapCreator(size) {
+rabbit.possibleSteps.push(freeSpace, wolf, home)
+wolf.possibleSteps.push(rabbit, freeSpace)
 
-    for (let i = 0; i < size; i++) {
-        
-        var line = document.createElement('tr');
-        mapMatrix[i] = line;
-        mapMatrix[i].lenght = size;
-
-        for (let m = 0; m < size; m++) {
-
-            var item = document.createElement('td');
-            line.appendChild(item);
-            mapMatrix[i][m] = item;
-
+function fillMatrix(mapSize) {
+    var matrix = [];
+    for (let y = 0; y < mapSize; y++) {
+        matrix[y] = [];
+        for (let x = 0; x < mapSize; x++) {
+            matrix[y][x] = freeSpace;
         }
+    }
+    return matrix;
+}
 
+function setConfig() {
+    mapSize = document.getElementById('mapSizeSelector').value;
+    wolfCount = mapSize - Math.floor(mapSize / 2)
+    wallCount = mapSize - Math.floor(mapSize / 2)
+    matrixState = fillMatrix(mapSize)
+}
+
+function randomFreePosition() {
+    const xRandom = Math.floor(Math.random() * mapSize)
+    const yRandom = Math.floor(Math.random() * mapSize)
+
+    if (matrixState[yRandom][xRandom] === freeSpace) {
+        return [yRandom, xRandom]
+    } else {
+        return randomFreePosition()
+    }
+}
+
+function setCharacter(character) {
+    const initialPosition = randomFreePosition();
+    matrixState[initialPosition[Y]][initialPosition[X]] = character;
+}
+
+function setCharacters(character, count) {
+    for (let i = 0; i < count; i++) {
+        setCharacter(character)
+    }
+}
+
+function setCharactersInitialPositions() {
+    setCharacters(rabbit, 1)
+    setCharacters(home, 1)
+    setCharacters(wolf, wolfCount)
+    setCharacters(wall, wallCount)
+}
+
+function matrixToDisplay(matrix) {
+    container.innerHTML = "";
+
+    for (let y = 0; y < mapSize; y++) {
+        const line = document.createElement('tr');
+
+        for (let x = 0; x < mapSize; x++) {
+            const item = document.createElement('td');
+
+            if (matrix[y][x] != freeSpace) {
+                const imageUrl = matrix[y][x].img
+                var image = document.createElement('img');
+                image.src = imageUrl;
+                image.setAttribute("class", "charImg")
+                item.appendChild(image);
+            }
+            line.appendChild(item)
+        }
         container.appendChild(line);
     }
 }
 
+function checkLoseOrWin(position1, position2) {
+    if (gameInProcess) {
+        if (matrixState[position1[Y]][position1[X]] == rabbit && matrixState[position2[Y]][position2[X]] == home) {
+            gameInProcess = false;
+            container.innerHTML = '<h2 class="winGame">!!!YOU WIN!!!</h2>';
 
-//Gives the created Charecter position in Game Map
-function addCharechter(maxNuber, name, arr) {
-   
-    var yPosition = Math.floor(Math.random() * maxNuber)
-    var xPosition = Math.floor(Math.random() * maxNuber)
-    if(mapMatrix[yPosition][xPosition].childNodes.length > 0) {
-        return addCharechter(maxNuber, name, arr)
-    }
-    if(name=='rabbit' || name=='home'){
-        arr[0]=yPosition;
-        arr[1]=xPosition;
+        } else if (matrixState[position1[Y]][position1[X]] == rabbit && matrixState[position2[Y]][position2[X]] == wolf) {
+            gameInProcess = false;
+            container.innerHTML = '<h2 class="loseGame">!!!YOU LOSE!!!</h1>';
 
-        var image = document.createElement('img');
-        image.src = `./images/${name}.png`;
-        image.setAttribute("class", "charImg")
-        mapMatrix[yPosition][xPosition].appendChild(image);
-
-    }else{
-    arr.push([yPosition,xPosition])
-
-    var image = document.createElement('img');
-        image.src = `./images/${name}.png`;
-        image.setAttribute("class", "charImg")
-        mapMatrix[yPosition][xPosition].appendChild(image);
-    
-    }
-
-}
-
-
-//Moves the Charecter to the new cube and deletes it from the old cube
-function moveCharecter(name, oldData, newData) {
-  
-    var image = document.createElement('img');
-    
-    image.src = `./images/${name}.png`;
-    image.setAttribute("class", "charImg")
-    mapMatrix[newData[0]][newData[1]].appendChild(image);
-
-    mapMatrix[oldData[0]][oldData[1]].innerHTML="<td></td>"
-  
-}
-
-
-//We create the characters
-//We use it every time when start a new game
-function createCharechters () {
-  
-    addCharechter(mapSize, 'home', homePosition);
-    addCharechter(mapSize, 'rabbit', rabbitPosition);
-
-    
-    for(let i=0; i<wolfCount; i++){
-        addCharechter(mapSize, 'wolf', wolfPosition);
-    }
-    
-    for(let i=0; i<wallCount; i++){
-        addCharechter(mapSize, 'wall', wallPosition);
+        } else if (matrixState[position1[Y]][position1[X]] == wolf && matrixState[position2[Y]][position2[X]] == rabbit) {
+            gameInProcess = false;
+            container.innerHTML = '<h2 class="loseGame">!!!YOU LOSE!!!</h1>';
+        }
     }
 }
 
-
-
-
-//Understands what step we want to take
-function rabbitMove(key){
-    
-    if(gameInProcess){
-
-        if(key === "ArrowUp"){
-            decideNewPositionForRabbit(-1,0)
-        }
-
-        else if(key === "ArrowDown"){
-            decideNewPositionForRabbit(1,0)
-        }
-
-        else if(key === "ArrowRight"){
-            decideNewPositionForRabbit(0,1)
-        }
-
-        else if(key === "ArrowLeft"){
-            decideNewPositionForRabbit(0,-1)
-        }
-        
-    }
-    
-}
-
-window.addEventListener("keyup", event => rabbitMove(event.key))
-
-
-
-
-//New rabbit coordinates
-function decideNewPositionForRabbit(y,x){
-  
-    var newRabbitPosition=[], oldRabbitPosition=[];
-   
-    newRabbitPosition[0]=rabbitPosition[0]
-    newRabbitPosition[1]=rabbitPosition[1]
-
-    oldRabbitPosition[0]=rabbitPosition[0]
-    oldRabbitPosition[1]=rabbitPosition[1]
-
-    newRabbitPosition[0] += y;
-    newRabbitPosition[1] += x;
-
-    if(newRabbitPosition[0] == mapSize)
-        newRabbitPosition[0]=0
-    else if(newRabbitPosition[1] == mapSize)
-        newRabbitPosition[1]=0
-    else if(newRabbitPosition[0] == -1)
-        newRabbitPosition[0] = (mapSize-1)
-    else if(newRabbitPosition[1] == -1)
-        newRabbitPosition[1] = (mapSize-1)
-    
-        allowStep(newRabbitPosition, oldRabbitPosition)
-}
-
-
-
-
-//He does not let the rabbit go to the wall coordinate
-function allowStep(newPosition, oldPosition){
-
-    if(mapMatrix[newPosition[0]][newPosition[1]].childNodes[0]){
-        if(mapMatrix[newPosition[0]][newPosition[1]].childNodes[0].currentSrc.split('').reverse().join('').slice(4, 8)=='llaw'){
-         
-        }else{
-            rabbitPosition[0]=newPosition[0];
-            rabbitPosition[1]=newPosition[1];
-            moveCharecter('rabbit', oldPosition, rabbitPosition);
-            winGame();
-            wolfStep();
-            
-        }
-    }else{
-            rabbitPosition[0]=newPosition[0];
-            rabbitPosition[1]=newPosition[1];
-            moveCharecter('rabbit', oldPosition, rabbitPosition);
-            winGame();
-            wolfStep();
-            
-        }
-    
-}
-
-
-
-
-
-
-//Takes the next step of the wolf
-function wolfStep(){
-   
-    var availablePositions = wolfAvailablePositions(wolfNeighborPositions(wolfPosition));
-    var index = minDistance(getPythagoras(availablePositions))
-
-    newWolfPosicion = [];
-    
-    for (let i = 0; i < availablePositions.length; i++) {
-        newWolfPosicion.push(availablePositions[i][index[i]]);
-    }
-
-
-    for (let i = 0; i < newWolfPosicion.length; i++) {
-        if(mapMatrix[newWolfPosicion[i][0]][newWolfPosicion[i][1]].childNodes[0]){
-            if (mapMatrix[newWolfPosicion[i][0]][newWolfPosicion[i][1]].childNodes[0].currentSrc.split('').reverse().join('').slice(4, 8)=='flow') {
-                
-            }else{
-                moveCharecter('wolf', wolfPosition[i], newWolfPosicion[i]);
-                wolfPosition[i] = newWolfPosicion[i];
-                loseGame();
+function getCharactersPosition(character, matrix) {
+    let charactersPosition = []
+    for (let y = 0; y < mapSize; y++) {
+        for (let x = 0; x < mapSize; x++) {
+            if (matrix[y][x] == character) {
+                charactersPosition.push([y, x])
             }
-        }else{
-            moveCharecter('wolf', wolfPosition[i], newWolfPosicion[i]);
-            wolfPosition[i] = newWolfPosicion[i];
-            loseGame();
         }
-    }    
+    }
+    if (charactersPosition.length == 1) {
+        return charactersPosition[0]
+    }
+    return charactersPosition
 }
 
+function rabbitTeleportation(newY, newX) {
+    if (newY == mapSize) {
+        newY = 0
+    } else if (newY == -1) {
+        newY = mapSize - 1
+    }
+    if (newX == mapSize) {
+        newX = 0
+    } else if (newX == -1) {
+        newX = mapSize - 1
+    }
+    return [newY, newX]
+}
 
+function characterStep(intalPosition, nextPosition) {
+    checkLoseOrWin(intalPosition, nextPosition)
+    matrixState[nextPosition[Y]][nextPosition[X]] = (matrixState[intalPosition[Y]][intalPosition[X]])
+    matrixState[intalPosition[Y]][intalPosition[X]] = freeSpace
 
+    if (gameInProcess) {
+        matrixToDisplay(matrixState)
+    }
+}
 
+function charactersStep(character, currentPosition, newPosition) {
+    if (character == rabbit) {
+        const checkTeleportation = rabbitTeleportation(newPosition[Y], newPosition[X]);
 
-function wolfNeighborPositions (wolfs){
-   
-    var neighborPositions = [];
-    
-    wolfs.map(wolf=>{
-       
-        neighborPositions.push([
-            [ wolf[0]-1, wolf[1] ],
-            [ wolf[0]+1, wolf[1] ],
-            [ wolf[0], wolf[1]+1 ],
-            [ wolf[0], wolf[1]-1 ]
-        ])
+        newPosition[Y] = checkTeleportation[Y]
+        newPosition[X] = checkTeleportation[X]
+    }
 
+    for (let i = 0; i < character.possibleSteps.length; i++) {
+        if (matrixState[newPosition[Y]][newPosition[X]] == character.possibleSteps[i]) {
+            characterStep(currentPosition, newPosition)
+            return newPosition
+        }
+    }
+}
+
+function pythagorasFromRabbit(wolfPossiblePositions) {
+
+    const rabbitPosition = getCharactersPosition(rabbit, matrixState)
+    const pythagoras = wolfPossiblePositions.map(position => {
+        return Math.sqrt(Math.pow(position[Y] - rabbitPosition[Y], 2) + Math.pow(position[X] - rabbitPosition[X], 2))
+    })
+
+    return pythagoras
+}
+
+function wolfPossiblePositions(wolfPositions) {
+    const possiblePositions = []
+
+    wolfPositions.map(wolfPosition => {
+
+        for (let i = 0; i < wolf.possibleSteps.length; i++) {
+            if (matrixState[wolfPosition[Y]][wolfPosition[X]] == wolf.possibleSteps[i]) {
+                possiblePositions.push(wolfPosition)
+            }
+        }
+    })
+    return possiblePositions;
+}
+
+function wolfneighbourPositions(wolfPosition) {
+
+    const mathWithPositions = [
+        [wolfPosition[Y] - 1, wolfPosition[X]],
+        [wolfPosition[Y] + 1, wolfPosition[X]],
+        [wolfPosition[Y], wolfPosition[X] + 1],
+        [wolfPosition[Y], wolfPosition[X] - 1],
+    ]
+
+    const neighbourPositions = mathWithPositions.filter((position) => {
+        return position[Y] >= 0 && position[Y] < mapSize && position[X] >= 0 && position[X] < mapSize
     });
 
-    return neighborPositions;
-}
-
-
-//We get the Probability coordinates for a wolf
-function wolfAvailablePositions(neighborPositions){
-    
-    var availablePositions = [];
-
-    neighborPositions.map(wolfNeighbors => {
-        var thisWolfAvailablePositions = [];
-        wolfNeighbors.map(wolfNeighborPos => {
-            
-            if (wolfNeighborPos[0]==-1 || wolfNeighborPos[1]==-1 || wolfNeighborPos[0]==mapSize || wolfNeighborPos[1]==mapSize ) {
-                
-            }else if(mapMatrix[wolfNeighborPos[0]][wolfNeighborPos[1]].childNodes[0]){
-                if(mapMatrix[wolfNeighborPos[0]][wolfNeighborPos[1]].childNodes[0].currentSrc.split('').reverse().join('').slice(4, 8)=='llaw' || mapMatrix[wolfNeighborPos[0]][wolfNeighborPos[1]].childNodes[0].currentSrc.split('').reverse().join('').slice(4, 8)=='emoh' ){
-                 
-                }else{
-                    thisWolfAvailablePositions.push([wolfNeighborPos[0],wolfNeighborPos[1]])
-                }
-            }else{
-                    thisWolfAvailablePositions.push([wolfNeighborPos[0],wolfNeighborPos[1]])
-            }
-        })
-
-        availablePositions.push(thisWolfAvailablePositions);
-    
-    })
-
-    return availablePositions;
-}
-
-
-//In this function Pythagoras calculates the distances from the rabbit to the coordinates where the wolf can go.
-function getPythagoras(availablePositions){
-   
-    var pythagoras = [];
-
-    availablePositions.map(wolf =>{
-        wolfPythagoras = [];
-        wolf.map(position=>{
-           wolfPythagoras.push((Math.sqrt(Math.pow(position[0] - rabbitPosition[0], 2) + Math.pow(position[1] - rabbitPosition[1], 2)))) 
-        })
-
-        pythagoras.push(wolfPythagoras);
-    })
-
-    return pythagoras;
+    return wolfPossiblePositions(neighbourPositions)
 
 }
 
+function getShortestDistancePosition(neighbourPositions, wolfPosition) {
+    const pythagoras = pythagorasFromRabbit(wolfneighbourPositions(wolfPosition))
 
+    let shortestIndex = 0;
 
-//Here we get the minimum distance from rabbit to for each wolf.
-function minDistance (pythagoras) {
-    
-    var minDistance = [];
-
-    pythagoras.map(distance=>{
-        var minIndex = 0
-        for (let i = 0; i < distance.length; i++) {
-            if (distance[minIndex] > distance[i]) {
-                minIndex = i;
-            }
+    for (let i = 0; i < pythagoras.length; i++) {
+        if (pythagoras[i] < pythagoras[shortestIndex]) {
+            shortestIndex = i;
         }
-        minDistance.push(minIndex);
-    })
-    return minDistance;
-
-}
-
-
-
-
-//When rabbit and home in same cube
-function winGame(){
-   
-    if( rabbitPosition[0]===homePosition[0] && rabbitPosition[1]===homePosition[1] ){
-        container.innerHTML='<h2 class="winGame">!!!YOU WIN!!!</h2>';
-        gameInProcess = false;
-
     }
 
+    return neighbourPositions[shortestIndex]
 }
 
+function moveWolves() {
+    const wolves = getCharactersPosition(wolf, matrixState)
 
-
-// What must do program if rabbit and wolf is same cube
-function loseGame(){
-  
-    wolfPosition.map(wolf => {
-        if( rabbitPosition[0]===wolf[0] && rabbitPosition[1]===wolf[1] ){
-            gameInProcess = false;
-            container.innerHTML='<h2 class="loseGame">!!!YOU LOSE!!!</h1>';
-        }
+    wolves.map(wolfPosition => {
+        const neighbourPositions = wolfneighbourPositions(wolfPosition)
+        const shortestDistancePosition = getShortestDistancePosition(neighbourPositions, wolfPosition)
+        charactersStep(wolf, wolfPosition, shortestDistancePosition)
     })
-
 }
 
+window.addEventListener("keyup", event => {
+    if (gameInProcess) {
+
+        const rabbitPosition = getCharactersPosition(rabbit, matrixState)
+
+        if (event.key === "ArrowUp") {
+            charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y] - 1, rabbitPosition[X]])
+            moveWolves()
+        }
+        else if (event.key === "ArrowDown") {
+            charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y] + 1, rabbitPosition[X]])
+            moveWolves()
+        }
+        else if (event.key === "ArrowRight") {
+            charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y], rabbitPosition[X] + 1])
+            moveWolves()
+        }
+        else if (event.key === "ArrowLeft") {
+            charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y], rabbitPosition[X] - 1])
+            moveWolves()
+        }
+    }
+})
 
 
-//When you click the "Start New Game" button, this function is called.
-function startGame(){
-    gameInProcess=true;
-    container.innerHTML="";
-    wolfPosition=[];
-    wallPosition=[];
-    setCountsOfChar(document.getElementById('mapSizeSelector').value)
-    mapCreator(mapSize);
-    createCharechters();
-    
+function startGame() {
+    gameInProcess = true
+    setConfig()
+    setCharactersInitialPositions()
+    matrixToDisplay(matrixState)
 }
