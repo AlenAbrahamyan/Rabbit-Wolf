@@ -244,17 +244,20 @@ window.addEventListener("keyup", event => {
 
         if (event.key === "ArrowUp") {
             charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y] - 1, rabbitPosition[X]])
+            moveWolves()
         }
         else if (event.key === "ArrowDown") {
             charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y] + 1, rabbitPosition[X]])
+            moveWolves()
         }
         else if (event.key === "ArrowRight") {
             charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y], rabbitPosition[X] + 1])
+            moveWolves()
         }
         else if (event.key === "ArrowLeft") {
             charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y], rabbitPosition[X] - 1])
+            moveWolves()
         }
-        moveWolves()
     }
 })
 
