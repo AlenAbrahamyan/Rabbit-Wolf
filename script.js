@@ -1,7 +1,13 @@
 const container = document.getElementById("container")
 const Y = 0, X = 1;
-var matrixState = [], mapSize, wolfCount, wallCount, gameInProcess = false;
 
+const configInfo = {
+    matrixState : [], 
+    mapSize: 0, 
+    wolfCount: 0, 
+    wallCount: 0, 
+    gameInProcess: false
+}
 
 const freeSpace = 0
 
@@ -31,7 +37,7 @@ const wolf = {
 rabbit.possibleSteps.push(freeSpace, wolf, home)
 wolf.possibleSteps.push(rabbit, freeSpace)
 
-function fillMatrix(mapSize) {
+const fillMatrix = (mapSize) => {
     var matrix = [];
     for (let y = 0; y < mapSize; y++) {
         matrix[y] = [];
@@ -42,49 +48,51 @@ function fillMatrix(mapSize) {
     return matrix;
 }
 
-function setConfig() {
-    mapSize = document.getElementById('mapSizeSelector').value;
-    wolfCount = mapSize - Math.floor(mapSize / 2)
-    wallCount = mapSize - Math.floor(mapSize / 2)
-    matrixState = fillMatrix(mapSize)
+const setConfig = () => {
+    configInfo.mapSize = document.getElementById('configInfo.mapSizeSelector').value;
+    configInfo.wolfCount = configInfo.mapSize - Math.floor(configInfo.mapSize / 2)
+    configInfo.wallCount = configInfo.mapSize - Math.floor(configInfo.mapSize / 2)
+    configInfo.matrixState = fillMatrix(configInfo.mapSize)
 }
 
-function randomFreePosition() {
-    const xRandom = Math.floor(Math.random() * mapSize)
-    const yRandom = Math.floor(Math.random() * mapSize)
 
-    if (matrixState[yRandom][xRandom] === freeSpace) {
+
+const randomFreePosition = () => {
+    const xRandom = Math.floor(Math.random() * configInfo.mapSize)
+    const yRandom = Math.floor(Math.random() * configInfo.mapSize)
+
+    if (configInfo.matrixState[yRandom][xRandom] === freeSpace) {
         return [yRandom, xRandom]
     } else {
         return randomFreePosition()
     }
 }
 
-function setCharacter(character) {
+const setCharacter = (character) => {
     const initialPosition = randomFreePosition();
-    matrixState[initialPosition[Y]][initialPosition[X]] = character;
+    configInfo.matrixState[initialPosition[Y]][initialPosition[X]] = character;
 }
 
-function setCharacters(character, count) {
+const setCharacters = (character, count) => {
     for (let i = 0; i < count; i++) {
         setCharacter(character)
     }
 }
 
-function setCharactersInitialPositions() {
+const setCharactersInitialPositions = () => {
     setCharacters(rabbit, 1)
     setCharacters(home, 1)
-    setCharacters(wolf, wolfCount)
-    setCharacters(wall, wallCount)
+    setCharacters(wolf, configInfo.wolfCount)
+    setCharacters(wall, configInfo.wallCount)
 }
 
-function matrixToDisplay(matrix) {
+const matrixToDisplay = (matrix) => {
     container.innerHTML = "";
 
-    for (let y = 0; y < mapSize; y++) {
+    for (let y = 0; y < configInfo.mapSize; y++) {
         const line = document.createElement('tr');
 
-        for (let x = 0; x < mapSize; x++) {
+        for (let x = 0; x < configInfo.mapSize; x++) {
             const item = document.createElement('td');
 
             if (matrix[y][x] != freeSpace) {
@@ -100,27 +108,27 @@ function matrixToDisplay(matrix) {
     }
 }
 
-function checkLoseOrWin(position1, position2) {
-    if (gameInProcess) {
-        if (matrixState[position1[Y]][position1[X]] == rabbit && matrixState[position2[Y]][position2[X]] == home) {
-            gameInProcess = false;
+const checkLoseOrWin = (position1, position2) => {
+    if (configInfo.gameInProcess) {
+        if (configInfo.matrixState[position1[Y]][position1[X]] == rabbit && configInfo.matrixState[position2[Y]][position2[X]] == home) {
+            configInfo.gameInProcess = false;
             container.innerHTML = '<h2 class="winGame">!!!YOU WIN!!!</h2>';
 
-        } else if (matrixState[position1[Y]][position1[X]] == rabbit && matrixState[position2[Y]][position2[X]] == wolf) {
-            gameInProcess = false;
+        } else if (configInfo.matrixState[position1[Y]][position1[X]] == rabbit && configInfo.matrixState[position2[Y]][position2[X]] == wolf) {
+            configInfo.gameInProcess = false;
             container.innerHTML = '<h2 class="loseGame">!!!YOU LOSE!!!</h1>';
 
-        } else if (matrixState[position1[Y]][position1[X]] == wolf && matrixState[position2[Y]][position2[X]] == rabbit) {
-            gameInProcess = false;
+        } else if (configInfo.matrixState[position1[Y]][position1[X]] == wolf && configInfo.matrixState[position2[Y]][position2[X]] == rabbit) {
+            configInfo.gameInProcess = false;
             container.innerHTML = '<h2 class="loseGame">!!!YOU LOSE!!!</h1>';
         }
     }
 }
 
-function getCharactersPosition(character, matrix) {
+const getCharactersPosition = (character, matrix) => {
     let charactersPosition = []
-    for (let y = 0; y < mapSize; y++) {
-        for (let x = 0; x < mapSize; x++) {
+    for (let y = 0; y < configInfo.mapSize; y++) {
+        for (let x = 0; x < configInfo.mapSize; x++) {
             if (matrix[y][x] == character) {
                 charactersPosition.push([y, x])
             }
@@ -132,49 +140,46 @@ function getCharactersPosition(character, matrix) {
     return charactersPosition
 }
 
-function rabbitTeleportation(newY, newX) {
-    if (newY == mapSize) {
+const characterStep = (intalPosition, nextPosition) => {
+    checkLoseOrWin(intalPosition, nextPosition)
+    configInfo.matrixState[nextPosition[Y]][nextPosition[X]] = (configInfo.matrixState[intalPosition[Y]][intalPosition[X]])
+    configInfo.matrixState[intalPosition[Y]][intalPosition[X]] = freeSpace
+    
+    if (configInfo.gameInProcess) {
+        matrixToDisplay(configInfo.matrixState)
+    }
+}
+
+const rabbitTeleportation = (newY, newX) => {
+    if (newY == configInfo.mapSize) {
         newY = 0
     } else if (newY == -1) {
-        newY = mapSize - 1
+        newY = configInfo.mapSize - 1
     }
-    if (newX == mapSize) {
+    if (newX == configInfo.mapSize) {
         newX = 0
     } else if (newX == -1) {
-        newX = mapSize - 1
+        newX = configInfo.mapSize - 1
     }
     return [newY, newX]
 }
 
-function characterStep(intalPosition, nextPosition) {
-    checkLoseOrWin(intalPosition, nextPosition)
-    matrixState[nextPosition[Y]][nextPosition[X]] = (matrixState[intalPosition[Y]][intalPosition[X]])
-    matrixState[intalPosition[Y]][intalPosition[X]] = freeSpace
 
-    if (gameInProcess) {
-        matrixToDisplay(matrixState)
-    }
-}
+const rabbitMovie = (newPosition) =>{
+    const currentPosition = getCharactersPosition(rabbit, configInfo.matrixState)
+    newPosition = rabbitTeleportation(newPosition[Y], newPosition[X]);
 
-function charactersStep(character, currentPosition, newPosition) {
-    if (character == rabbit) {
-        const checkTeleportation = rabbitTeleportation(newPosition[Y], newPosition[X]);
-
-        newPosition[Y] = checkTeleportation[Y]
-        newPosition[X] = checkTeleportation[X]
-    }
-
-    for (let i = 0; i < character.possibleSteps.length; i++) {
-        if (matrixState[newPosition[Y]][newPosition[X]] == character.possibleSteps[i]) {
-            characterStep(currentPosition, newPosition)
-            return newPosition
+    for (let i = 0; i < rabbit.possibleSteps.length; i++) {
+        if (configInfo.matrixState[newPosition[Y]][newPosition[X]] == rabbit.possibleSteps[i]) {
+            characterStep(currentPosition, newPosition) 
+            moveWolves()
         }
     }
 }
 
-function pythagorasFromRabbit(wolfPossiblePositions) {
+const pythagorasFromRabbit = (wolfPossiblePositions) => {
 
-    const rabbitPosition = getCharactersPosition(rabbit, matrixState)
+    const rabbitPosition = getCharactersPosition(rabbit, configInfo.matrixState)
     const pythagoras = wolfPossiblePositions.map(position => {
         return Math.sqrt(Math.pow(position[Y] - rabbitPosition[Y], 2) + Math.pow(position[X] - rabbitPosition[X], 2))
     })
@@ -182,13 +187,13 @@ function pythagorasFromRabbit(wolfPossiblePositions) {
     return pythagoras
 }
 
-function wolfPossiblePositions(wolfPositions) {
+const wolfPossiblePositions = (wolfPositions) => {
     const possiblePositions = []
 
-    wolfPositions.map(wolfPosition => {
+    wolfPositions.forEach(wolfPosition => {
 
         for (let i = 0; i < wolf.possibleSteps.length; i++) {
-            if (matrixState[wolfPosition[Y]][wolfPosition[X]] == wolf.possibleSteps[i]) {
+            if (configInfo.matrixState[wolfPosition[Y]][wolfPosition[X]] == wolf.possibleSteps[i]) {
                 possiblePositions.push(wolfPosition)
             }
         }
@@ -196,24 +201,26 @@ function wolfPossiblePositions(wolfPositions) {
     return possiblePositions;
 }
 
-function wolfneighbourPositions(wolfPosition) {
+const mathWithPositions = (wolfPosition) => {return [
+    [wolfPosition[Y] - 1, wolfPosition[X]],
+    [wolfPosition[Y] + 1, wolfPosition[X]],
+    [wolfPosition[Y], wolfPosition[X] + 1],
+    [wolfPosition[Y], wolfPosition[X] - 1],
+]}
 
-    const mathWithPositions = [
-        [wolfPosition[Y] - 1, wolfPosition[X]],
-        [wolfPosition[Y] + 1, wolfPosition[X]],
-        [wolfPosition[Y], wolfPosition[X] + 1],
-        [wolfPosition[Y], wolfPosition[X] - 1],
-    ]
+const wolfneighbourPositions = (wolfPosition) => {
 
-    const neighbourPositions = mathWithPositions.filter((position) => {
-        return position[Y] >= 0 && position[Y] < mapSize && position[X] >= 0 && position[X] < mapSize
+    const mathWithPosition =  mathWithPositions(wolfPosition);
+
+    const neighbourPositions = mathWithPosition.filter((position) => {
+        return position[Y] >= 0 && position[Y] < configInfo.mapSize && position[X] >= 0 && position[X] < configInfo.mapSize
     });
 
     return wolfPossiblePositions(neighbourPositions)
 
 }
 
-function getShortestDistancePosition(neighbourPositions, wolfPosition) {
+const getShortestDistancePosition = (neighbourPositions, wolfPosition) => {
     const pythagoras = pythagorasFromRabbit(wolfneighbourPositions(wolfPosition))
 
     let shortestIndex = 0;
@@ -227,44 +234,39 @@ function getShortestDistancePosition(neighbourPositions, wolfPosition) {
     return neighbourPositions[shortestIndex]
 }
 
-function moveWolves() {
-    const wolves = getCharactersPosition(wolf, matrixState)
+const moveWolves = () => {
+    const wolves = getCharactersPosition(wolf, configInfo.matrixState)
 
     wolves.map(wolfPosition => {
         const neighbourPositions = wolfneighbourPositions(wolfPosition)
         const shortestDistancePosition = getShortestDistancePosition(neighbourPositions, wolfPosition)
-        charactersStep(wolf, wolfPosition, shortestDistancePosition)
+        characterStep(wolfPosition, shortestDistancePosition)
     })
 }
 
 window.addEventListener("keyup", event => {
-    if (gameInProcess) {
-
-        const rabbitPosition = getCharactersPosition(rabbit, matrixState)
-
+    if (configInfo.gameInProcess) {
+        const rabbitPosition = getCharactersPosition(rabbit, configInfo.matrixState)
         if (event.key === "ArrowUp") {
-            charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y] - 1, rabbitPosition[X]])
-            moveWolves()
+            rabbitMovie([rabbitPosition[Y] - 1, rabbitPosition[X]])
         }
         else if (event.key === "ArrowDown") {
-            charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y] + 1, rabbitPosition[X]])
-            moveWolves()
+            rabbitMovie([rabbitPosition[Y] + 1, rabbitPosition[X]])
         }
         else if (event.key === "ArrowRight") {
-            charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y], rabbitPosition[X] + 1])
-            moveWolves()
+            rabbitMovie([rabbitPosition[Y], rabbitPosition[X] + 1])
         }
         else if (event.key === "ArrowLeft") {
-            charactersStep(rabbit, rabbitPosition, [rabbitPosition[Y], rabbitPosition[X] - 1])
-            moveWolves()
+            rabbitMovie([rabbitPosition[Y], rabbitPosition[X] - 1])
         }
+        
     }
 })
 
 
-function startGame() {
-    gameInProcess = true
+const startGame = () => {
+    configInfo.gameInProcess = true
     setConfig()
     setCharactersInitialPositions()
-    matrixToDisplay(matrixState)
+    matrixToDisplay(configInfo.matrixState)
 }
