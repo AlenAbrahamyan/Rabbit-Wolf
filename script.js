@@ -49,7 +49,7 @@ const fillMatrix = (mapSize) => {
 }
 
 const setConfig = () => {
-    configInfo.mapSize = document.getElementById('configInfo.mapSizeSelector').value;
+    configInfo.mapSize = document.getElementById("mapSizeSelector").value;
     configInfo.wolfCount = configInfo.mapSize - Math.floor(configInfo.mapSize / 2)
     configInfo.wallCount = configInfo.mapSize - Math.floor(configInfo.mapSize / 2)
     configInfo.matrixState = fillMatrix(configInfo.mapSize)
