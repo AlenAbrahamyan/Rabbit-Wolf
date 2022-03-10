@@ -49,7 +49,7 @@ const fillMatrix = (mapSize) => {
 }
 
 const setConfig = () => {
-    configInfo.mapSize = document.getElementById("mapSizeSelector").value;
+    configInfo.mapSize = document.getElementById('mapSizeSelector').value;
     configInfo.wolfCount = configInfo.mapSize - Math.floor(configInfo.mapSize / 2)
     configInfo.wallCount = configInfo.mapSize - Math.floor(configInfo.mapSize / 2)
     configInfo.matrixState = fillMatrix(configInfo.mapSize)
@@ -167,7 +167,7 @@ const rabbitTeleportation = (newY, newX) => {
 
 const rabbitMovie = (newPosition) =>{
     const currentPosition = getCharactersPosition(rabbit, configInfo.matrixState)
-    newPosition = rabbitTeleportation(newPosition[Y], newPosition[X]);
+    newPosition = rabbitTeleportation(currentPosition[Y]+newPosition[Y], currentPosition[X]+newPosition[X]);
 
     for (let i = 0; i < rabbit.possibleSteps.length; i++) {
         if (configInfo.matrixState[newPosition[Y]][newPosition[X]] == rabbit.possibleSteps[i]) {
@@ -246,18 +246,17 @@ const moveWolves = () => {
 
 window.addEventListener("keyup", event => {
     if (configInfo.gameInProcess) {
-        const rabbitPosition = getCharactersPosition(rabbit, configInfo.matrixState)
         if (event.key === "ArrowUp") {
-            rabbitMovie([rabbitPosition[Y] - 1, rabbitPosition[X]])
+            rabbitMovie([-1, 0])
         }
         else if (event.key === "ArrowDown") {
-            rabbitMovie([rabbitPosition[Y] + 1, rabbitPosition[X]])
+            rabbitMovie([1, 0])
         }
         else if (event.key === "ArrowRight") {
-            rabbitMovie([rabbitPosition[Y], rabbitPosition[X] + 1])
+            rabbitMovie([0, 1])
         }
         else if (event.key === "ArrowLeft") {
-            rabbitMovie([rabbitPosition[Y], rabbitPosition[X] - 1])
+            rabbitMovie([0, -1])
         }
         
     }
