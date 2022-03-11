@@ -33,7 +33,6 @@ const wolf = {
     possibleSteps: []
 }
 
-
 rabbit.possibleSteps.push(freeSpace, wolf, home)
 wolf.possibleSteps.push(rabbit, freeSpace)
 
@@ -54,8 +53,6 @@ const setConfig = () => {
     configInfo.wallCount = configInfo.mapSize - Math.floor(configInfo.mapSize / 2)
     configInfo.matrixState = fillMatrix(configInfo.mapSize)
 }
-
-
 
 const randomFreePosition = () => {
     const xRandom = Math.floor(Math.random() * configInfo.mapSize)
@@ -164,19 +161,6 @@ const rabbitTeleportation = (newY, newX) => {
     return [newY, newX]
 }
 
-
-const rabbitMovie = (newPosition) =>{
-    const currentPosition = getCharactersPosition(rabbit, configInfo.matrixState)
-    newPosition = rabbitTeleportation(currentPosition[Y]+newPosition[Y], currentPosition[X]+newPosition[X]);
-
-    for (let i = 0; i < rabbit.possibleSteps.length; i++) {
-        if (configInfo.matrixState[newPosition[Y]][newPosition[X]] == rabbit.possibleSteps[i]) {
-            characterStep(currentPosition, newPosition) 
-            moveWolves()
-        }
-    }
-}
-
 const pythagorasFromRabbit = (wolfPossiblePositions) => {
 
     const rabbitPosition = getCharactersPosition(rabbit, configInfo.matrixState)
@@ -209,28 +193,21 @@ const mathWithPositions = (wolfPosition) => {return [
 ]}
 
 const wolfneighbourPositions = (wolfPosition) => {
-
     const mathWithPosition =  mathWithPositions(wolfPosition);
-
     const neighbourPositions = mathWithPosition.filter((position) => {
         return position[Y] >= 0 && position[Y] < configInfo.mapSize && position[X] >= 0 && position[X] < configInfo.mapSize
     });
-
     return wolfPossiblePositions(neighbourPositions)
-
 }
 
 const getShortestDistancePosition = (neighbourPositions, wolfPosition) => {
     const pythagoras = pythagorasFromRabbit(wolfneighbourPositions(wolfPosition))
-
     let shortestIndex = 0;
-
     for (let i = 0; i < pythagoras.length; i++) {
         if (pythagoras[i] < pythagoras[shortestIndex]) {
             shortestIndex = i;
         }
     }
-
     return neighbourPositions[shortestIndex]
 }
 
@@ -242,6 +219,18 @@ const moveWolves = () => {
         const shortestDistancePosition = getShortestDistancePosition(neighbourPositions, wolfPosition)
         characterStep(wolfPosition, shortestDistancePosition)
     })
+}
+
+const rabbitMovie = (newPosition) =>{
+    const currentPosition = getCharactersPosition(rabbit, configInfo.matrixState)
+    newPosition = rabbitTeleportation(currentPosition[Y]+newPosition[Y], currentPosition[X]+newPosition[X]);
+
+    for (let i = 0; i < rabbit.possibleSteps.length; i++) {
+        if (configInfo.matrixState[newPosition[Y]][newPosition[X]] == rabbit.possibleSteps[i]) {
+            characterStep(currentPosition, newPosition) 
+            moveWolves()
+        }
+    }
 }
 
 window.addEventListener("keyup", event => {
@@ -257,11 +246,9 @@ window.addEventListener("keyup", event => {
         }
         else if (event.key === "ArrowLeft") {
             rabbitMovie([0, -1])
-        }
-        
+        } 
     }
 })
-
 
 const startGame = () => {
     configInfo.gameInProcess = true
