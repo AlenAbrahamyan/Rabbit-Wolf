@@ -60,9 +60,8 @@ const randomFreePosition = () => {
 
     if (configInfo.matrixState[yRandom][xRandom] === freeSpace) {
         return [yRandom, xRandom]
-    } else {
-        return randomFreePosition()
     }
+    return randomFreePosition()
 }
 
 const setCharacter = (character) => {
