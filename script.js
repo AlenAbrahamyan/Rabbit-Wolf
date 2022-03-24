@@ -259,31 +259,33 @@ const createMatrix = (_config, containerAdress) => {
         }
     }
 
-    window.addEventListener("keyup", event => {
-
-        if (config.info.gameInProcess
-            &&
-            (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "ArrowRight" || event.key === "ArrowLeft")) {
-
-            if (event.key === "ArrowUp") {
-                rabbitMove([-1, 0])
-            }
-            else if (event.key === "ArrowDown") {
-                rabbitMove([1, 0])
-            }
-            else if (event.key === "ArrowRight") {
-                rabbitMove([0, 1])
-            }
-            else if (event.key === "ArrowLeft") {
-                rabbitMove([0, -1])
-            }
+    const reactToEvents = (direction) => {
+        if (config.info.gameInProcess === false) {
+            return false
         }
+        if (direction === "ArrowUp") {
+            rabbitMove([-1, 0])
+        } else if (direction === "ArrowDown") {
+            rabbitMove([1, 0])
+        } else if (direction === "ArrowRight") {
+            rabbitMove([0, 1])
+        } else if (direction === "ArrowLeft") {
+            rabbitMove([0, -1])
+        }
+    }
+
+    window.addEventListener("keyup", event => {
+        reactToEvents(event.key)
     })
 
-    config.startGameProcess()
-    fillMatrix()
-    setMatrixInitialPositions()
-    toDisplay()
+    const startGame = () => {
+        config.startGameProcess()
+        fillMatrix()
+        setMatrixInitialPositions()
+        toDisplay()
+    }
+
+    startGame()
 
     return {
         config,
