@@ -47,6 +47,10 @@ margin: 3px;
     font-size: 35px;
 }
 
+.redBtn{
+    background-color: red;
+}
+
 .loseGame{
     color: red;
     font-size: 55px;
