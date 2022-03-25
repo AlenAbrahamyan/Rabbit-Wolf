@@ -85,10 +85,9 @@ const createConfig = (selectedMapSize) => {
 }
 
 
-const createMatrix = (_config, containerAdress) => {
-    const container = containerAdress
-    const config = _config
-    let state = []
+const createMatrix = (containerID) => {
+    const container = document.getElementById(containerID).getElementsByTagName('table')[0]
+    let state = [], config
 
     const fillMatrix = () => {
         for (let y = 0; y < config.info.mapSize; y++) {
@@ -274,29 +273,83 @@ const createMatrix = (_config, containerAdress) => {
         }
     }
 
-    window.addEventListener("keyup", event => {
-        reactToEvents(event.key)
-    })
-
-    const startGame = () => {
+    const startGame = (_config) => {
+        config = _config
         config.startGameProcess()
         fillMatrix()
         setMatrixInitialPositions()
         toDisplay()
     }
 
-    startGame()
-
     return {
-        config,
-        state
+        reactToEvents,
+        startGame
     }
 }
 
+const newGameBlockInterface = (id) => {
+    const blockContainer = document.getElementById(id);
 
-const startGame = () => {
-    const selectedMapSize = document.getElementById('mapSizeSelector').value
-    const containerAdress = document.getElementById("container")
-    createMatrix(createConfig(selectedMapSize), containerAdress)
+    const select = document.createElement('select')
+    select.setAttribute('class', 'buttonStyle')
+    select.innerHTML = `
+                <option value="5">5X5</option>
+                <option value="7">7X7</option>
+                <option value="9">9X9</option>`
 
+
+    const startGame = document.createElement('button')
+    startGame.setAttribute('class', 'buttonStyle')
+    startGame.innerHTML = `Start Game`
+    startGame.onclick = () => matrix.startGame(createConfig(select.value))
+
+    const removeGameBlock = document.createElement('button')
+    removeGameBlock.setAttribute('class', 'buttonStyle')
+    removeGameBlock.innerHTML = `Remove Game Block`
+    removeGameBlock.onclick = () => blockContainer.remove();
+
+    const table = document.createElement('table')
+    const controller = document.createElement('div')
+
+    const createArrowBtn = (simboleCode) => {
+        const btn = document.createElement('button')
+        btn.setAttribute('class', 'buttonStyle arrowButtonStyle')
+        btn.innerHTML = simboleCode
+        return btn
+    }
+
+    stepLeft = createArrowBtn("&#8592;")
+    stepLeft.onclick = () => matrix.reactToEvents("ArrowLeft")
+    controller.appendChild(stepLeft)
+
+    stepUp = createArrowBtn("&#8593;")
+    stepUp.onclick = () => matrix.reactToEvents("ArrowUp")
+    controller.appendChild(stepUp)
+
+    stepDown = createArrowBtn("&#8595;")
+    stepDown.onclick = () => matrix.reactToEvents("ArrowDown")
+    controller.appendChild(stepDown)
+
+    stepRight = createArrowBtn("&#8594;")
+    stepRight.onclick = () => matrix.reactToEvents("ArrowRight")
+    controller.appendChild(stepRight)
+
+    blockContainer.appendChild(select)
+    blockContainer.appendChild(startGame)
+    blockContainer.appendChild(removeGameBlock)
+    blockContainer.appendChild(table)
+    blockContainer.appendChild(controller)
+
+    const matrix = createMatrix(id)
 }
+
+const newGameBlock = () => {
+    const newGameBlockContainer = document.createElement('div')
+    const id = Math.floor(Math.random() * 10000000)
+    newGameBlockContainer.innerHTML = `<hr/>`
+    newGameBlockContainer.setAttribute('id', id)
+
+    document.getElementById("main_container").appendChild(newGameBlockContainer)
+    newGameBlockInterface(id)
+}
+
