@@ -1,34 +1,20 @@
 <html>
-
 <head>
     <title>Rabbit & Wolf</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-    
     <center>
         <h1>Rabbit & Wolf</h1>
-        <div id="controlPanel">
-            <label>Choose Map Size:</label>
-            <select class='buttonStyle' id="mapSizeSelector" >
-                <option value="5">5X5</option>
-                <option value="7">7X7</option>
-                <option value="9">9X9</option>
-            </select>
-            <button class='buttonStyle' onclick="startGame()">
-                Start New Game
-            </button>
+        <button class='buttonStyle' onclick="newGameBlock()">
+            New Game Block
+        </button>
+        <div id="main_container">
+
         </div>
-
-
-        <table id="container"></table>
     </center>
 
     <script src="./script.js"></script>
-
-    <script>
-    function myFunck(){console.log(document.getElementById('framework').value)}</script>
 </body>
-
 </html>
