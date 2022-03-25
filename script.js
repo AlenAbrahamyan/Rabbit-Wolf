@@ -304,7 +304,7 @@ const newGameBlockInterface = (id) => {
     startGame.onclick = () => matrix.startGame(createConfig(select.value))
 
     const removeGameBlock = document.createElement('button')
-    removeGameBlock.setAttribute('class', 'buttonStyle')
+    removeGameBlock.setAttribute('class', 'buttonStyle redBtn')
     removeGameBlock.innerHTML = `Remove Game Block`
     removeGameBlock.onclick = () => blockContainer.remove();
 
